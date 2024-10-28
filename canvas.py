@@ -81,5 +81,4 @@ class Canvas(QtWidgets.QLabel):
             
     def mouseReleaseEvent(self, e):
         """ Reset previous position on mouse release """
-        self.prev_x = None
-        self.prev_y = None
+        self.prev_x, self.prev_y = None, None

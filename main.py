@@ -17,16 +17,16 @@ class NightPainterWindow(QtWidgets.QMainWindow):
         self.setScreen(self.primaryScreen)
         # Set initial window size based on screen size
         initial_size_divider = 2
-        initial_width = (self.primaryScreen.availableSize().width()
-                         //initial_size_divider)
-        initial_height = (self.primaryScreen.availableSize().height()
-                          //initial_size_divider)
+        primary_screen_size = (self.primaryScreen.availableSize().width(), 
+                               self.primaryScreen.availableSize().height())
+        initial_width = (primary_screen_size[0]//initial_size_divider)
+        initial_height = (primary_screen_size[1]//initial_size_divider)
         self.resize(initial_width, initial_height)
         self.setMinimumSize(320, 180) # Avoid making window too small for use
 
         # Create canvas 
         self.canvas = Canvas(initial_width, initial_height)
-        self.canvas.setAlignment(Qt.AlignCenter)
+        self.canvas.setAlignment(Qt.AlignLeft|Qt.AlignTop)
 
         self.setCentralWidget(self.canvas)
 

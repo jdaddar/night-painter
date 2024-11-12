@@ -13,6 +13,7 @@ class Canvas(QtWidgets.QLabel):
 
         # Create and set pixmap for canvas, using default color
         self.initial_pixmap = QtGui.QPixmap(w, h)
+        self.resize(w, h)
         self.initial_pixmap.fill(QtGui.QColor(self.canvas_color))
         self.setPixmap(self.initial_pixmap)
 
@@ -20,49 +21,50 @@ class Canvas(QtWidgets.QLabel):
         self.prev_x, self.prev_y = None, None
         self.pixmap_stack = deque([], max_undo)
 
-        # Brush settings
-        self.brush_size = 4
-        self.brush_primary_color = QtGui.QColor('white') # TODO: load from setting
-        self.brush_secondary_color = QtGui.QColor('black') # TODO: load from setting
+        # Pen settings
+        self.pen_primary_color = QtGui.QColor('white') # TODO: load from setting
+        self.pen_secondary_color = QtGui.QColor(self.canvas_color) # TODO: load from setting
+        self.pen = QtGui.QPen()
+        self.pen.setWidth(5)
+        self.pen.setColor(self.pen_primary_color)
+        self.pen.setCapStyle(Qt.RoundCap)
+        self.pen.setJoinStyle(Qt.RoundJoin)
 
-    def set_brush_size(self, size):
-        """ Set brush size """
-        self.brush_size = size;
+    def set_pen_size(self, size):
+        """ Set pen size """
+        self.pen.setWidth(size)
     
-    def set_brush_primary_color(self, color):
-        """ Set brush primary color """
-        self.brush_primary_color = QtGui.QColor(color)
+    def set_pen_primary_color(self, color):
+        """ Set pen primary color """
+        self.pen_primary_color = QtGui.QColor(color)
 
-    def set_brush_secondary_color(self, color):
-        """ Set brush secondary color """
-        self.brush_secondary_color = QtGui.QColor(color)
+    def set_pen_secondary_color(self, color):
+        """ Set pen secondary color """
+        self.pen_secondary_color = QtGui.QColor(color)
 
-    def draw_brush_point(self, x, y, color):
+    def draw_pen_point(self, x, y, color):
         """ 
-        Paint point with brush at pos(x, y) using brush of specified color 
+        Paint point with pen at pos(x, y) using pen of specified color 
         """
         current_pixmap = self.pixmap()
         painter = QtGui.QPainter(current_pixmap)
-        # TODO: test if brush is more sensible
-        pen = painter.pen()
-        pen.setWidth(self.brush_size)
-        pen.setColor(color)
-        painter.setPen(pen)
+        painter.setRenderHint(QtGui.QPainter.Antialiasing)
+        self.pen.setColor(color)
+        painter.setPen(self.pen)
         painter.drawPoint(x, y)
         painter.end()
         self.setPixmap(current_pixmap)
 
-    def draw_brush_line(self, start_x, start_y, x, y, color):
+    def draw_pen_line(self, start_x, start_y, x, y, color):
         """ 
-        Paint line with brush from pos(start_x, start_y) to pos(x, y) 
+        Paint line with pen from pos(start_x, start_y) to pos(x, y) 
         of specified color
         """
         current_pixmap = self.pixmap()
         painter = QtGui.QPainter(current_pixmap)
-        pen = painter.pen()
-        pen.setWidth(self.brush_size)
-        pen.setColor(color)
-        painter.setPen(pen)
+        painter.setRenderHint(QtGui.QPainter.Antialiasing)
+        self.pen.setColor(color)
+        painter.setPen(self.pen)
         painter.drawLine(start_x, start_y, x, y)
         painter.end()
         self.setPixmap(current_pixmap)
@@ -79,14 +81,14 @@ class Canvas(QtWidgets.QLabel):
         # Paint point of primary/secondary color based on left/right click
         if e.buttons() == Qt.LeftButton:
             self.saveCanvas(self.pixmap())
-            self.draw_brush_point(e.position().toPoint().x(), 
-                                  e.position().toPoint().y(), 
-                                  self.brush_primary_color)
+            self.draw_pen_point(e.position().toPoint().x(), 
+                                e.position().toPoint().y(), 
+                                self.pen_primary_color)
         elif e.buttons() == Qt.RightButton:
             self.saveCanvas(self.pixmap())
-            self.draw_brush_point(e.position().toPoint().x(), 
-                                  e.position().toPoint().y(), 
-                                  self.brush_secondary_color)
+            self.draw_pen_point(e.position().toPoint().x(), 
+                                e.position().toPoint().y(), 
+                                self.pen_secondary_color)
 
     def mouseMoveEvent(self, e):
         if self.prev_x is None: # First event
@@ -97,17 +99,17 @@ class Canvas(QtWidgets.QLabel):
         # Paint line of primary/secondary color based on left/right click 
         # from previous mouse pos to current pos 
         if e.buttons() == Qt.LeftButton:
-            self.draw_brush_line(self.prev_x, 
-                                 self.prev_y, 
-                                 e.position().toPoint().x(), 
-                                 e.position().toPoint().y(), 
-                                 self.brush_primary_color)
+            self.draw_pen_line(self.prev_x, 
+                               self.prev_y, 
+                               e.position().toPoint().x(), 
+                               e.position().toPoint().y(), 
+                               self.pen_primary_color)
         elif e.buttons() == Qt.RightButton:
-            self.draw_brush_line(self.prev_x, 
-                                 self.prev_y, 
-                                 e.position().toPoint().x(), 
-                                 e.position().toPoint().y(), 
-                                 self.brush_secondary_color)
+            self.draw_pen_line(self.prev_x, 
+                               self.prev_y, 
+                               e.position().toPoint().x(), 
+                               e.position().toPoint().y(), 
+                               self.pen_secondary_color)
 
         # Update mouse loc
         self.prev_x = e.position().toPoint().x()

@@ -22,11 +22,11 @@ class Canvas(QtWidgets.QLabel):
         self.pixmap_stack = deque([], max_undo)
 
         # Pen settings
-        self.pen_primary_color = QtGui.QColor('white') # TODO: load from setting
-        self.pen_secondary_color = QtGui.QColor(self.canvas_color) # TODO: load from setting
+        self.primary_color = QtGui.QColor('white') # TODO: load from setting
+        self.secondary_color = QtGui.QColor(self.canvas_color) # TODO: load from setting
         self.pen = QtGui.QPen()
         self.pen.setWidth(5)
-        self.pen.setColor(self.pen_primary_color)
+        self.pen.setColor(self.primary_color)
         self.pen.setCapStyle(Qt.RoundCap)
         self.pen.setJoinStyle(Qt.RoundJoin)
 
@@ -34,13 +34,21 @@ class Canvas(QtWidgets.QLabel):
         """ Set pen size """
         self.pen.setWidth(size)
     
-    def set_pen_primary_color(self, color):
-        """ Set pen primary color """
-        self.pen_primary_color = QtGui.QColor(color)
+    def set_primary_color(self, color):
+        """ Set primary color """
+        self.primary_color = QtGui.QColor(color)
 
-    def set_pen_secondary_color(self, color):
+    def set_secondary_color(self, color):
         """ Set pen secondary color """
-        self.pen_secondary_color = QtGui.QColor(color)
+        self.secondary_color = QtGui.QColor(color)
+
+    def get_primary_color(self):
+        """ Get primary color """
+        return self.primary_color
+    
+    def get_secondary_color(self):
+        """ Get secondary color """
+        return self.secondary_color
 
     def draw_pen_point(self, x, y, color):
         """ 
@@ -83,12 +91,12 @@ class Canvas(QtWidgets.QLabel):
             self.saveCanvas(self.pixmap())
             self.draw_pen_point(e.position().toPoint().x(), 
                                 e.position().toPoint().y(), 
-                                self.pen_primary_color)
+                                self.primary_color)
         elif e.buttons() == Qt.RightButton:
             self.saveCanvas(self.pixmap())
             self.draw_pen_point(e.position().toPoint().x(), 
                                 e.position().toPoint().y(), 
-                                self.pen_secondary_color)
+                                self.secondary_color)
 
     def mouseMoveEvent(self, e):
         if self.prev_x is None: # First event
@@ -103,13 +111,13 @@ class Canvas(QtWidgets.QLabel):
                                self.prev_y, 
                                e.position().toPoint().x(), 
                                e.position().toPoint().y(), 
-                               self.pen_primary_color)
+                               self.primary_color)
         elif e.buttons() == Qt.RightButton:
             self.draw_pen_line(self.prev_x, 
                                self.prev_y, 
                                e.position().toPoint().x(), 
                                e.position().toPoint().y(), 
-                               self.pen_secondary_color)
+                               self.secondary_color)
 
         # Update mouse loc
         self.prev_x = e.position().toPoint().x()

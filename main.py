@@ -1,7 +1,7 @@
 from PySide6 import QtCore, QtGui, QtWidgets
 from PySide6.QtWidgets import QLabel, QColorDialog, QToolBar
 from PySide6.QtGui import QScreen, QGuiApplication, QAction, QIcon, QPixmap
-from PySide6.QtCore import Qt, QSize
+from PySide6.QtCore import Qt, QSize, QPoint
 
 from canvas import Canvas
 
@@ -29,9 +29,7 @@ class NightPainterWindow(QtWidgets.QMainWindow):
         self.canvas.setAlignment(Qt.AlignLeft|Qt.AlignTop)
 
         # Color picker
-        self.color_picker = QColorDialog()
-        self.color_picker.setParent(self) # Force opens dialog on start
-        self.color_picker.reject()        # Necessary due to above
+        self.color_picker = QColorDialog(self)
         self.color_picker.colorSelected.connect(
             lambda x: self.color_picker.currentColorChanged.disconnect())
 
@@ -87,6 +85,7 @@ class NightPainterWindow(QtWidgets.QMainWindow):
 
     def on_primary_color_click(self):
         """ Open color picker to change primary color """
+        # TODO : change how this works to use QColorDialog.open properly
         self.color_picker.setCurrentColor(self.primary_color)
         self.color_picker.currentColorChanged.connect(
             self.change_primary_color)
@@ -101,6 +100,7 @@ class NightPainterWindow(QtWidgets.QMainWindow):
 
     def on_secondary_color_click(self):
         """ Open color picker to change secondary color """
+        # TODO : change how this works to use QColorDialog.open properly
         self.color_picker.setCurrentColor(self.secondary_color)
         self.color_picker.currentColorChanged.connect(
             self.change_secondary_color)

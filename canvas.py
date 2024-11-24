@@ -7,14 +7,13 @@ class Canvas(QtWidgets.QLabel):
         super().__init__()
 
         # Settings
-        self.canvas_color = 'black' # TODO: load from setting
-        max_undo = 500 # rec values: low:20, mid:50, high:200, ultra:500
+        self.canvas_bg_color = 'black' # TODO: load from setting
+        max_undo = 200 # rec values: low:20, mid:50, high:200, ultra:500
                        # max mb ram:    100,    215       770
 
         # Create and set pixmap for canvas, using default color
         self.initial_pixmap = QtGui.QPixmap(w, h)
-        self.resize(w, h)
-        self.initial_pixmap.fill(QtGui.QColor(self.canvas_color))
+        self.initial_pixmap.fill(QtGui.QColor(self.canvas_bg_color))
         self.setPixmap(self.initial_pixmap)
 
         # Initializing useful variables 
@@ -23,7 +22,7 @@ class Canvas(QtWidgets.QLabel):
 
         # Pen settings
         self.primary_color = QtGui.QColor('white') # TODO: load from setting
-        self.secondary_color = QtGui.QColor(self.canvas_color) # TODO: load from setting
+        self.secondary_color = QtGui.QColor(self.canvas_bg_color) # TODO: load from setting
         self.pen = QtGui.QPen()
         self.pen.setWidth(5)
         self.pen.setColor(self.primary_color)
@@ -77,10 +76,6 @@ class Canvas(QtWidgets.QLabel):
         painter.end()
         self.setPixmap(current_pixmap)
 
-    def saveCanvas(self, pixmap):
-        """ Add pixmap to 'undo' stack """
-        self.pixmap_stack.append(pixmap)
-
     def mousePressEvent(self, e):
         # Set mouse position start for movement tracking
         self.prev_x = e.position().toPoint().x()
@@ -88,12 +83,12 @@ class Canvas(QtWidgets.QLabel):
 
         # Paint point of primary/secondary color based on left/right click
         if e.buttons() == Qt.LeftButton:
-            self.saveCanvas(self.pixmap())
+            self.pixmap_stack.append(self.pixmap())
             self.draw_pen_point(e.position().toPoint().x(), 
                                 e.position().toPoint().y(), 
                                 self.primary_color)
         elif e.buttons() == Qt.RightButton:
-            self.saveCanvas(self.pixmap())
+            self.pixmap_stack.append(self.pixmap())
             self.draw_pen_point(e.position().toPoint().x(), 
                                 e.position().toPoint().y(), 
                                 self.secondary_color)
@@ -136,3 +131,12 @@ class Canvas(QtWidgets.QLabel):
             self.setPixmap(self.pixmap_stack.pop())
         except IndexError: # IndexError can only occur if stack is empty,
             pass           # therefore pass as we have reached undo limit 
+
+    def reset(self):
+        """ 
+        Reverts canvas to base state
+        Clears 'undo' stack 
+        """
+        self.setPixmap(self.initial_pixmap)
+        self.pixmap_stack.clear()
+

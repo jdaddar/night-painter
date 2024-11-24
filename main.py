@@ -1,7 +1,7 @@
 from PySide6 import QtCore, QtGui, QtWidgets
 from PySide6.QtWidgets import QLabel, QColorDialog, QToolBar
 from PySide6.QtGui import QScreen, QGuiApplication, QAction, QIcon, QPixmap
-from PySide6.QtCore import Qt, QSize, QPoint
+from PySide6.QtCore import Qt, QSize, QPoint, QByteArray, QBuffer
 
 from canvas import Canvas
 
@@ -30,8 +30,6 @@ class NightPainterWindow(QtWidgets.QMainWindow):
 
         # Color picker
         self.color_picker = QColorDialog(self)
-        self.color_picker.colorSelected.connect(
-            lambda x: self.color_picker.currentColorChanged.disconnect())
 
         # Color pixmaps
         self.primary_color = self.canvas.get_primary_color()
@@ -42,8 +40,18 @@ class NightPainterWindow(QtWidgets.QMainWindow):
         self.secondary_pixmap.fill(self.secondary_color)
 
         # Actions
+        self.action_new_canvas = QAction(
+            QIcon.fromTheme(QIcon.ThemeIcon.DocumentNew), "&New", self)
+        self.action_new_canvas.setStatusTip("Create New Canvas")
+        self.action_new_canvas.triggered.connect(self.on_new_canvas_click)
+
+        self.action_save = QAction(
+            QIcon.fromTheme(QIcon.ThemeIcon.DocumentSave), "&Save", self)
+        self.action_save.setStatusTip("Quicksave File")
+        self.action_save.triggered.connect(self.on_save_click)
+
         self.action_save_as = QAction(
-            QIcon.fromTheme(QIcon.ThemeIcon.DocumentSaveAs), "&Save As", self)
+            QIcon.fromTheme(QIcon.ThemeIcon.DocumentSaveAs), "Save &As", self)
         self.action_save_as.setStatusTip("Save File to PC")
         self.action_save_as.triggered.connect(self.on_save_as_click)
 
@@ -60,6 +68,8 @@ class NightPainterWindow(QtWidgets.QMainWindow):
         # Menu
         menu = self.menuBar()
         file_menu = menu.addMenu("&File")
+        file_menu.addAction(self.action_new_canvas)
+        file_menu.addAction(self.action_save)
         file_menu.addAction(self.action_save_as)
 
         # Toolbar
@@ -79,39 +89,94 @@ class NightPainterWindow(QtWidgets.QMainWindow):
         if e.keyCombination() == undo_hotkey:
             self.canvas.undo()
 
+        # 'Save' hotkey
+        save_hotkey = Qt.KeyboardModifier.ControlModifier|Qt.Key.Key_S
+        if e.keyCombination() == save_hotkey or e.key == Qt.Key.Key_Save:
+            self.on_save_click()
+
+    def on_new_canvas_click(self):
+        """ Create new canvas """
+        self.canvas.reset()
+
+    def on_save_click(self):
+        # TODO: make user choose filename/path if canvas not yet saved
+        #       otherwise save automatically over previous filename
+        self.canvas.pixmap().save("image.png", 'PNG')
+
     def on_save_as_click(self):
         """ Save canvas to file """
         pass
 
     def on_primary_color_click(self):
         """ Open color picker to change primary color """
-        # TODO : change how this works to use QColorDialog.open properly
         self.color_picker.setCurrentColor(self.primary_color)
         self.color_picker.currentColorChanged.connect(
             self.change_primary_color)
+        self.color_picker.colorSelected.connect(
+            self.selected_primary_color)
+        self.color_picker.rejected.connect(
+            self.cancel_primary_color)
         self.color_picker.open()
 
     def change_primary_color(self):
         """ Dynamically primary color based on color picker choice """
-        self.primary_color = self.color_picker.currentColor()
+        self.primary_pixmap.fill(self.color_picker.currentColor())
+        self.action_primary_color.setIcon(self.primary_pixmap)
+
+    def selected_primary_color(self):
+        """ Change primary color, send to canvas, disconnect signals """
+        new_color = self.color_picker.currentColor()
+        self.primary_color = new_color
+        self.canvas.set_primary_color(new_color)
+        # Disconnect
+        self.disconnect_color_picker_signals()
+
+    def cancel_primary_color(self):
+        """ 
+        Cancel primary color selection, revert icon, disconnect signals 
+        """
         self.primary_pixmap.fill(self.primary_color)
         self.action_primary_color.setIcon(self.primary_pixmap)
-        self.canvas.set_primary_color(self.primary_color)
+        # Disconnect
+        self.disconnect_color_picker_signals()
 
     def on_secondary_color_click(self):
         """ Open color picker to change secondary color """
-        # TODO : change how this works to use QColorDialog.open properly
         self.color_picker.setCurrentColor(self.secondary_color)
         self.color_picker.currentColorChanged.connect(
             self.change_secondary_color)
+        self.color_picker.colorSelected.connect(
+            self.selected_secondary_color)
+        self.color_picker.rejected.connect(
+            self.cancel_secondary_color)
         self.color_picker.open()
 
     def change_secondary_color(self):
         """ Dynamically secondary color based on color picker choice """
-        self.secondary_color = self.color_picker.currentColor()
+        self.secondary_pixmap.fill(self.color_picker.currentColor())
+        self.action_secondary_color.setIcon(self.secondary_pixmap)
+
+    def selected_secondary_color(self):
+        """ Change secondary color, send to canvas, disconnect signals """
+        new_color = self.color_picker.currentColor()
+        self.secondary_color = new_color
+        self.canvas.set_secondary_color(new_color)
+        # Disconnect
+        self.disconnect_color_picker_signals()
+
+    def cancel_secondary_color(self):
+        """ 
+        Cancel secondary color selection, revert icon, disconnect signals 
+        """
         self.secondary_pixmap.fill(self.secondary_color)
         self.action_secondary_color.setIcon(self.secondary_pixmap)
-        self.canvas.set_secondary_color(self.secondary_color)
+        # Disconnect
+        self.disconnect_color_picker_signals()
+
+    def disconnect_color_picker_signals(self):
+        self.color_picker.currentColorChanged.disconnect()
+        self.color_picker.colorSelected.disconnect()
+        self.color_picker.rejected.disconnect()
 
 
 # Run app

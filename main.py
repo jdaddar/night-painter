@@ -1,5 +1,5 @@
 from PySide6 import QtCore, QtGui, QtWidgets
-from PySide6.QtWidgets import QLabel, QColorDialog, QToolBar
+from PySide6.QtWidgets import QLabel, QColorDialog, QToolBar, QFileDialog
 from PySide6.QtGui import QScreen, QGuiApplication, QAction, QIcon, QPixmap
 from PySide6.QtCore import Qt, QSize, QPoint, QByteArray, QBuffer
 
@@ -28,8 +28,14 @@ class NightPainterWindow(QtWidgets.QMainWindow):
         self.canvas = Canvas(initial_width, initial_height)
         self.canvas.setAlignment(Qt.AlignLeft|Qt.AlignTop)
 
-        # Color picker
+        # Color picker dialog
         self.color_picker = QColorDialog(self)
+
+        # File dialog
+        self.file_dialog = QFileDialog(self)
+        self.file_dialog.setAcceptMode(QFileDialog.AcceptSave)
+        self.file_dialog.setNameFilter("Images (*.png *.jpg *.jpeg *.bmp)")
+        self.current_filename = None
 
         # Color pixmaps
         self.primary_color = self.canvas.get_primary_color()
@@ -58,12 +64,14 @@ class NightPainterWindow(QtWidgets.QMainWindow):
         self.action_primary_color = QAction(
             QIcon(self.primary_pixmap),"Primary Color", self)
         self.action_primary_color.setStatusTip("Choose Primary Color")
-        self.action_primary_color.triggered.connect(self.on_primary_color_click)
+        self.action_primary_color.triggered.connect(
+            self.on_primary_color_click)
 
         self.action_secondary_color = QAction(
             QIcon(self.secondary_pixmap),"Secondary Color", self)
         self.action_secondary_color.setStatusTip("Choose Secondary Color")
-        self.action_secondary_color.triggered.connect(self.on_secondary_color_click)
+        self.action_secondary_color.triggered.connect(
+            self.on_secondary_color_click)
 
         # Menu
         menu = self.menuBar()
@@ -97,15 +105,26 @@ class NightPainterWindow(QtWidgets.QMainWindow):
     def on_new_canvas_click(self):
         """ Create new canvas """
         self.canvas.reset()
+        self.current_filename = None
 
     def on_save_click(self):
-        # TODO: make user choose filename/path if canvas not yet saved
-        #       otherwise save automatically over previous filename
-        self.canvas.pixmap().save("image.png", 'PNG')
+        """ 
+        Autosave to file currently associated with canvas,
+        or default to manual save if file not yet created 
+        """
+        if self.current_filename:
+            self.canvas.pixmap().save(self.current_filename)
+        else:
+            self.on_save_as_click()
 
     def on_save_as_click(self):
-        """ Save canvas to file """
-        pass
+        """ Save and associated canvas to specific file """
+        file_dialog_success = self.file_dialog.exec()
+        
+        if file_dialog_success:
+            filename = self.file_dialog.selectedFiles()[0]
+            self.canvas.pixmap().save(filename)
+            self.current_filename = filename
 
     def on_primary_color_click(self):
         """ Open color picker to change primary color """

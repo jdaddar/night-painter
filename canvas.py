@@ -32,6 +32,10 @@ class Canvas(QtWidgets.QLabel):
     def set_pen_size(self, size):
         """ Set pen size """
         self.pen.setWidth(size)
+
+    def get_pen_size(self):
+        """ Return pen size """
+        return self.pen.width()
     
     def set_primary_color(self, color):
         """ Set primary color """

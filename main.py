@@ -1,6 +1,8 @@
 from PySide6 import QtCore, QtGui, QtWidgets
-from PySide6.QtWidgets import QLabel, QColorDialog, QToolBar, QFileDialog
-from PySide6.QtGui import QScreen, QGuiApplication, QAction, QIcon, QPixmap
+from PySide6.QtWidgets import (
+    QLabel, QColorDialog, QToolBar, QFileDialog, QLineEdit, QHBoxLayout)
+from PySide6.QtGui import (
+    QScreen, QGuiApplication, QAction, QIcon, QPixmap, QIntValidator)
 from PySide6.QtCore import Qt, QSize, QPoint, QByteArray, QBuffer
 
 from canvas import Canvas
@@ -73,6 +75,21 @@ class NightPainterWindow(QtWidgets.QMainWindow):
         self.action_secondary_color.triggered.connect(
             self.on_secondary_color_click)
 
+        # Widgets for use in toolbar/menu
+        # Pen size widgets
+        pen_size_label = QLabel("Size:")
+        pen_size_px_label = QLabel("px")
+        self.pen_size_edit = QLineEdit(self)
+        self.pen_size_edit.setMaximumWidth(32)
+        self.pen_size_edit.setMaxLength(3)
+        self.pen_size_edit.setFocusPolicy(Qt.FocusPolicy.ClickFocus)
+        self.pen_size_edit.setAlignment(Qt.AlignmentFlag.AlignRight)
+        self.pen_size_edit.setText(str(self.canvas.get_pen_size()))
+        # pen_size_validator = QIntValidator(1, 999, self)
+        # self.pen_size_edit.setValidator(pen_size_validator)
+        self.pen_size_edit.setInputMask('000')
+        self.pen_size_edit.editingFinished.connect(self.on_pen_size_change)
+
         # Menu
         menu = self.menuBar()
         file_menu = menu.addMenu("&File")
@@ -86,10 +103,19 @@ class NightPainterWindow(QtWidgets.QMainWindow):
         self.toolbar.setMovable(False)
         self.addToolBar(self.toolbar)
 
+        self.toolbar.addWidget(pen_size_label)
+        self.toolbar.addWidget(self.pen_size_edit)
+        self.toolbar.addWidget(pen_size_px_label)
+        self.toolbar.addSeparator()
         self.toolbar.addAction(self.action_primary_color)
         self.toolbar.addAction(self.action_secondary_color)
 
         self.setCentralWidget(self.canvas)
+        self.setFocusPolicy(Qt.FocusPolicy.ClickFocus)
+
+    def reached(self): #TODO: remove
+        """ Testing signal reach """
+        print("reached")
 
     def keyPressEvent(self, e:QtGui.QKeyEvent):
         # 'Undo' hotkey
@@ -187,15 +213,31 @@ class NightPainterWindow(QtWidgets.QMainWindow):
         """ 
         Cancel secondary color selection, revert icon, disconnect signals 
         """
-        self.secondary_pixmap.fill(self.secondary_color)
+        self.secondary_pixmap.fill(self.secondary_color)   
         self.action_secondary_color.setIcon(self.secondary_pixmap)
         # Disconnect
         self.disconnect_color_picker_signals()
 
     def disconnect_color_picker_signals(self):
+        """ Disconnects in-use signals for the color picker """
         self.color_picker.currentColorChanged.disconnect()
         self.color_picker.colorSelected.disconnect()
         self.color_picker.rejected.disconnect()
+
+    def on_pen_size_change(self):
+        """ 
+        Set pen size according to size input in line edit,
+        otherwise revert text in edit box to previous size.
+        """
+        text = self.pen_size_edit.text()
+        prev_pen_size = self.canvas.get_pen_size()
+        
+        if text == '' or text is None:
+            self.pen_size_edit.setText(str(prev_pen_size))
+        elif int(text) == 0:
+            self.pen_size_edit.setText(str(prev_pen_size))
+        else:
+            self.canvas.set_pen_size(int(text))
 
 
 # Run app

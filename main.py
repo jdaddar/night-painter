@@ -3,7 +3,7 @@ from PySide6.QtWidgets import (
     QLabel, QColorDialog, QToolBar, QFileDialog, QLineEdit, QHBoxLayout)
 from PySide6.QtGui import (
     QScreen, QGuiApplication, QAction, QIcon, QPixmap, QIntValidator)
-from PySide6.QtCore import Qt, QSize, QPoint, QByteArray, QBuffer
+from PySide6.QtCore import Qt, QSize, QPoint, QByteArray, QBuffer, QSettings
 
 from canvas import Canvas
 
@@ -13,21 +13,19 @@ class NightPainterWindow(QtWidgets.QMainWindow):
 
         self.setWindowTitle("Night Painter")
 
-        # TODO: fix all this to use settings to maintain previous sizes
         # Get primary screen info & open app on primary screen
         self.primaryScreen = QGuiApplication.primaryScreen()
         self.setScreen(self.primaryScreen)
-        # Set initial window size based on screen size
-        initial_size_divider = 2
-        primary_screen_size = (self.primaryScreen.availableSize().width(), 
-                               self.primaryScreen.availableSize().height())
-        initial_width = (primary_screen_size[0]//initial_size_divider)
-        initial_height = (primary_screen_size[1]//initial_size_divider)
-        self.resize(initial_width, initial_height)
         self.setMinimumSize(320, 180) # Avoid making window too small for use
 
+        # Read config settings 
+        self.readSettings()
+
         # Create canvas 
-        self.canvas = Canvas(initial_width, initial_height)
+        self.canvas = Canvas(self.width(), self.height(), self.bg_color)
+        self.canvas.set_primary_color(self.primary_color)
+        self.canvas.set_secondary_color(self.secondary_color)
+        self.canvas.set_pen_size(self.init_pen_size)
         self.canvas.setAlignment(Qt.AlignLeft|Qt.AlignTop)
 
         # Color picker dialog
@@ -40,8 +38,6 @@ class NightPainterWindow(QtWidgets.QMainWindow):
         self.current_filename = None
 
         # Color pixmaps
-        self.primary_color = self.canvas.get_primary_color()
-        self.secondary_color = self.canvas.get_secondary_color()
         self.primary_pixmap = QPixmap(32, 32)
         self.primary_pixmap.fill(self.primary_color)
         self.secondary_pixmap = QPixmap(32, 32)
@@ -238,6 +234,46 @@ class NightPainterWindow(QtWidgets.QMainWindow):
             self.pen_size_edit.setText(str(prev_pen_size))
         else:
             self.canvas.set_pen_size(int(text))
+
+    def writeSettings(self):
+        """ Write out settings/config """
+        settings = QSettings("NightJay", "Night Painter")
+        # Main window settings group
+        settings.beginGroup("MainWindow")
+        settings.setValue("geometry", self.saveGeometry())
+        settings.endGroup()
+        # Canvas settings group
+        settings.beginGroup("Canvas")
+        settings.setValue("primary_color", self.canvas.get_primary_color())
+        settings.setValue("secondary_color", self.canvas.get_secondary_color())
+        settings.setValue("background_color", self.canvas.canvas_bg_color)
+        settings.setValue("pen_size", self.canvas.get_pen_size())
+        settings.endGroup()
+
+    def readSettings(self):
+        """ Read in settings/config """
+        settings = QSettings("NightJay", "Night Painter")
+        # Main window settings group
+        settings.beginGroup("MainWindow")
+        geometry = settings.value("geometry", QByteArray())
+        if geometry.isEmpty():
+            self.resize(
+                self.primaryScreen.availableSize().width()//2,
+                self.primaryScreen.availableSize().height()//2)
+        else: 
+            self.restoreGeometry(geometry)
+        settings.endGroup()
+        # Canvas settings group
+        settings.beginGroup("Canvas")
+        self.primary_color = settings.value("primary_color", QtGui.QColor('white'))
+        self.secondary_color = settings.value("secondary_color", QtGui.QColor('black'))
+        self.bg_color = settings.value("background_color", QtGui.QColor('black'))
+        self.init_pen_size = int(settings.value("pen_size", 5))
+        settings.endGroup()
+
+    def closeEvent(self, e):
+        self.writeSettings()
+        return super().closeEvent(e)
 
 
 # Run app

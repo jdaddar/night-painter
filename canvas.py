@@ -3,17 +3,17 @@ from PySide6.QtCore import Qt
 from collections import deque
 
 class Canvas(QtWidgets.QLabel):
-    def __init__(self, w: int, h: int): #TODO: make init more functional
+    def __init__(self, w: int, h: int, bg: QtGui.QColor=QtGui.QColor('black')): #TODO: make init more functional
         super().__init__()
 
         # Settings
-        self.canvas_bg_color = 'black' # TODO: load from setting
-        max_undo = 200 # rec values: low:20, mid:50, high:200, ultra:500
+        self.canvas_bg_color = bg # TODO: load from setting
+        max_undo = 200 # rec values: low:20, mid:50, high:200, ultra:500 #TODO: load from setting
                        # max mb ram:    100,    215       770
 
         # Create and set pixmap for canvas, using default color
         self.initial_pixmap = QtGui.QPixmap(w, h)
-        self.initial_pixmap.fill(QtGui.QColor(self.canvas_bg_color))
+        self.initial_pixmap.fill(self.canvas_bg_color)
         self.setPixmap(self.initial_pixmap)
 
         # Initializing useful variables 
@@ -21,8 +21,8 @@ class Canvas(QtWidgets.QLabel):
         self.pixmap_stack = deque([], max_undo)
 
         # Pen settings
-        self.primary_color = QtGui.QColor('white') # TODO: load from setting
-        self.secondary_color = QtGui.QColor(self.canvas_bg_color) # TODO: load from setting
+        self.primary_color = QtGui.QColor('white')
+        self.secondary_color = self.canvas_bg_color
         self.pen = QtGui.QPen()
         self.pen.setWidth(5)
         self.pen.setColor(self.primary_color)

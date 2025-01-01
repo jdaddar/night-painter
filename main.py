@@ -22,7 +22,7 @@ class NightPainterWindow(QtWidgets.QMainWindow):
         self.readSettings()
 
         # Create canvas 
-        self.canvas = Canvas(self.width(), self.height(), self.bg_color)
+        self.canvas = Canvas(1280, 720, self.bg_color)
         self.canvas.set_primary_color(self.primary_color)
         self.canvas.set_secondary_color(self.secondary_color)
         self.canvas.set_pen_size(self.init_pen_size)
@@ -81,8 +81,6 @@ class NightPainterWindow(QtWidgets.QMainWindow):
         self.pen_size_edit.setFocusPolicy(Qt.FocusPolicy.ClickFocus)
         self.pen_size_edit.setAlignment(Qt.AlignmentFlag.AlignRight)
         self.pen_size_edit.setText(str(self.canvas.get_pen_size()))
-        # pen_size_validator = QIntValidator(1, 999, self)
-        # self.pen_size_edit.setValidator(pen_size_validator)
         self.pen_size_edit.setInputMask('000')
         self.pen_size_edit.editingFinished.connect(self.on_pen_size_change)
 
@@ -244,7 +242,8 @@ class NightPainterWindow(QtWidgets.QMainWindow):
         settings.endGroup()
         # Canvas settings group
         settings.beginGroup("Canvas")
-        settings.setValue("primary_color", self.canvas.get_primary_color())
+        # TODO: convert color config to HEX values (makes it editable in config)
+        settings.setValue("primary_color", self.canvas.get_primary_color()) 
         settings.setValue("secondary_color", self.canvas.get_secondary_color())
         settings.setValue("background_color", self.canvas.canvas_bg_color)
         settings.setValue("pen_size", self.canvas.get_pen_size())
@@ -260,7 +259,7 @@ class NightPainterWindow(QtWidgets.QMainWindow):
             self.resize(
                 self.primaryScreen.availableSize().width()//2,
                 self.primaryScreen.availableSize().height()//2)
-        else: 
+        else:
             self.restoreGeometry(geometry)
         settings.endGroup()
         # Canvas settings group

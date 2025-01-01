@@ -80,6 +80,28 @@ class Canvas(QtWidgets.QLabel):
         painter.end()
         self.setPixmap(current_pixmap)
 
+    # def resize_canvas(self, w: int, h: int):
+    #     """ Resize canvas without resetting pixmaps """
+    #     new_pixmap = QtGui.QPixmap(w, h)
+    #     new_pixmap.fill(self.canvas_bg_color)
+    #     painter = QtGui.QPainter(new_pixmap)
+    #     painter.drawPixmap(0, 0, self.pixmap())
+    #     painter.end()
+    #     self.setPixmap(new_pixmap)
+
+    def resize_canvas(self, w:int, h:int):
+        """ Resize canvas without restting pixmaps """
+        self.setPixmap(self.resized_pixmap(self.pixmap(), w, h))
+
+    def resized_pixmap(self, pixmap: QtGui.QPixmap, w: int, h: int) -> QtGui.QPixmap:
+        """ Resize pixmap, maintaining painting """
+        new_pixmap = QtGui.QPixmap(w, h)
+        new_pixmap.fill(self.canvas_bg_color)
+        painter = QtGui.QPainter(new_pixmap)
+        painter.drawPixmap(0, 0, self.pixmap())
+        painter.end()
+        return new_pixmap
+
     def mousePressEvent(self, e):
         # Set mouse position start for movement tracking
         self.prev_x = e.position().toPoint().x()

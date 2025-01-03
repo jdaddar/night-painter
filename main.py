@@ -24,7 +24,8 @@ class NightPainterWindow(QtWidgets.QMainWindow):
         self.readSettings()
 
         # Create canvas 
-        self.canvas = Canvas(1280, 720, self.bg_color)
+        self.canvas = Canvas(
+            self.canvas_width, self.canvas_height, self.bg_color)
         self.canvas.set_primary_color(self.primary_color)
         self.canvas.set_secondary_color(self.secondary_color)
         self.canvas.set_pen_size(self.init_pen_size)
@@ -134,11 +135,17 @@ class NightPainterWindow(QtWidgets.QMainWindow):
         if e.keyCombination() == save_hotkey or e.key == Qt.Key.Key_Save:
             self.on_save_click()
 
-    # TODO: dialog to resize canvas
     def on_resize_canvas_click(self):
         """ Dialog to resize canvas """
         canvas_size_dlg = CanvasSizeDialog(self)
-        canvas_size_dlg.exec()
+        canvas_size_dlg.set_width_text(self.canvas.get_width())
+        canvas_size_dlg.set_height_text(self.canvas.get_height())
+        accepted = canvas_size_dlg.exec()
+
+        if accepted:
+            self.canvas.resize_canvas(
+                canvas_size_dlg.get_width_int(), 
+                canvas_size_dlg.get_height_int())            
 
     def on_new_canvas_click(self):
         """ Create new canvas """
@@ -261,6 +268,8 @@ class NightPainterWindow(QtWidgets.QMainWindow):
         # Canvas settings group
         settings.beginGroup("Canvas")
         # TODO: convert color config to HEX values (makes it editable in config)
+        settings.setValue("canvas_width", self.canvas.get_width())
+        settings.setValue("canvas_height", self.canvas.get_height())
         settings.setValue("primary_color", self.canvas.get_primary_color()) 
         settings.setValue("secondary_color", self.canvas.get_secondary_color())
         settings.setValue("background_color", self.canvas.canvas_bg_color)
@@ -282,6 +291,8 @@ class NightPainterWindow(QtWidgets.QMainWindow):
         settings.endGroup()
         # Canvas settings group
         settings.beginGroup("Canvas")
+        self.canvas_width = int(settings.value("canvas_width", 1280))
+        self.canvas_height = int(settings.value("canvas_height", 720))
         self.primary_color = settings.value("primary_color", QtGui.QColor('white'))
         self.secondary_color = settings.value("secondary_color", QtGui.QColor('black'))
         self.bg_color = settings.value("background_color", QtGui.QColor('black'))

@@ -12,9 +12,9 @@ class Canvas(QtWidgets.QLabel):
                        # max mb ram:    100,    215       770
 
         # Create and set pixmap for canvas, using default color
-        self.initial_pixmap = QtGui.QPixmap(w, h)
-        self.initial_pixmap.fill(self.canvas_bg_color)
-        self.setPixmap(self.initial_pixmap)
+        initial_pixmap = QtGui.QPixmap(w, h)
+        initial_pixmap.fill(self.canvas_bg_color)
+        self.setPixmap(initial_pixmap)
 
         # Initializing useful variables 
         self.prev_x, self.prev_y = None, None
@@ -90,6 +90,7 @@ class Canvas(QtWidgets.QLabel):
 
     def resize_canvas(self, w:int, h:int):
         """ Resize canvas without resetting pixmaps """
+        self.pixmap_stack.append(self.pixmap())
         self.setPixmap(self.resized_pixmap(self.pixmap(), w, h))
 
     def resized_pixmap(self, pixmap: QtGui.QPixmap, w: int, h: int) -> QtGui.QPixmap:
@@ -162,6 +163,9 @@ class Canvas(QtWidgets.QLabel):
         Reverts canvas to base state
         Clears 'undo' stack 
         """
-        self.setPixmap(self.initial_pixmap)
+        clear_pixmap = QtGui.QPixmap(
+            self.pixmap().width(), self.pixmap().height())
+        clear_pixmap.fill(self.canvas_bg_color)
+        self.setPixmap(clear_pixmap)
         self.pixmap_stack.clear()
 

@@ -46,12 +46,20 @@ class Canvas(QtWidgets.QLabel):
         self.secondary_color = QtGui.QColor(color)
 
     def get_primary_color(self):
-        """ Get primary color """
+        """ Return primary color """
         return self.primary_color
     
     def get_secondary_color(self):
-        """ Get secondary color """
+        """ Return secondary color """
         return self.secondary_color
+    
+    def get_width(self):
+        """ Return canvas width """
+        return self.pixmap().width()
+    
+    def get_height(self):
+        """ Return canvas height """
+        return self.pixmap().height()
 
     def draw_pen_point(self, x, y, color):
         """ 

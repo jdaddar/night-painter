@@ -1,11 +1,13 @@
 from PySide6 import QtCore, QtGui, QtWidgets
 from PySide6.QtWidgets import (
-    QLabel, QColorDialog, QToolBar, QFileDialog, QLineEdit, QHBoxLayout)
+    QLabel, QDialog, QColorDialog, QToolBar, QFileDialog, QLineEdit, 
+    QDialogButtonBox, QHBoxLayout, QVBoxLayout)
 from PySide6.QtGui import (
     QScreen, QGuiApplication, QAction, QIcon, QPixmap, QIntValidator)
 from PySide6.QtCore import Qt, QSize, QPoint, QByteArray, QBuffer, QSettings
 
 from canvas import Canvas
+from dialogs import CanvasSizeDialog
 
 class NightPainterWindow(QtWidgets.QMainWindow):
     def __init__(self): # TODO: make init more functional
@@ -70,6 +72,12 @@ class NightPainterWindow(QtWidgets.QMainWindow):
         self.action_secondary_color.setStatusTip("Choose Secondary Color")
         self.action_secondary_color.triggered.connect(
             self.on_secondary_color_click)
+        
+        self.action_resize_canvas = QAction(
+            QIcon.fromTheme(QIcon.ThemeIcon.ViewFullscreen), "&Resize Canvas", self)
+        self.action_resize_canvas.setStatusTip("Resize Canvas")
+        self.action_resize_canvas.triggered.connect(
+            self.on_resize_canvas_click)
 
         # Widgets for use in toolbar/menu
         # Pen size widgets
@@ -86,10 +94,14 @@ class NightPainterWindow(QtWidgets.QMainWindow):
 
         # Menu
         menu = self.menuBar()
+
         file_menu = menu.addMenu("&File")
         file_menu.addAction(self.action_new_canvas)
         file_menu.addAction(self.action_save)
         file_menu.addAction(self.action_save_as)
+
+        edit_menu = menu.addMenu("&Edit")
+        edit_menu.addAction(self.action_resize_canvas)
 
         # Toolbar
         self.toolbar = QToolBar("Main Toolbar")
@@ -121,6 +133,12 @@ class NightPainterWindow(QtWidgets.QMainWindow):
         save_hotkey = Qt.KeyboardModifier.ControlModifier|Qt.Key.Key_S
         if e.keyCombination() == save_hotkey or e.key == Qt.Key.Key_Save:
             self.on_save_click()
+
+    # TODO: dialog to resize canvas
+    def on_resize_canvas_click(self):
+        """ Dialog to resize canvas """
+        canvas_size_dlg = CanvasSizeDialog(self)
+        canvas_size_dlg.exec()
 
     def on_new_canvas_click(self):
         """ Create new canvas """

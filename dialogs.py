@@ -49,24 +49,34 @@ class CanvasSizeDialog(QDialog):
         self.setLayout(layout)
 
     def set_width_text(self, s:str):
+        """ Set text of 'width' line edit by string """
         self.width_edit.setText(s)
 
     def set_width_text(self, num:int):
+        """ Set text of 'width' line edit by int '"""
         self.width_edit.setText(str(num))
 
     def set_height_text(self, s:str):
+        """ Set text of 'height' line edit by string """
         self.height_edit.setText(s)
 
     def set_height_text(self, num:int):
+        """ Set text of 'height' line edit by int """
         self.height_edit.setText(str(num))
 
     def get_width_text(self) -> str:
+        """ Return 'width' line edit's text """
         return self.width_edit.text()
     
     def get_height_text(self) -> str:
+        """ Return 'height' line edit's text """
         return self.height_edit.text()
     
     def get_width_int(self) -> int:
+        """ 
+        Return 'width' line edit's text as int,
+        returning default size if input invalid.
+        """
         width = int(self.width_edit.text())
         if width > 0:
             return width
@@ -74,6 +84,10 @@ class CanvasSizeDialog(QDialog):
             return self.default_size
     
     def get_height_int(self) -> int:
+        """ 
+        Return 'height' line edit's text as int,
+        returning default size if input invalid.
+        """
         height = int(self.height_edit.text())
         if height > 0:
             return height

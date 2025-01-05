@@ -80,6 +80,12 @@ class NightPainterWindow(QtWidgets.QMainWindow):
         self.action_resize_canvas.triggered.connect(
             self.on_resize_canvas_click)
 
+        self.action_open_settings = QAction(
+            QIcon.fromTheme(QIcon.ThemeIcon.DocumentProperties), "&Settings", self)
+        self.action_open_settings.setStatusTip("Open Settings Window")
+        self.action_open_settings.triggered.connect(
+            self.on_settings_click)
+
         # Widgets for use in toolbar/menu
         # Pen size widgets
         pen_size_label = QLabel("Size:")
@@ -103,6 +109,7 @@ class NightPainterWindow(QtWidgets.QMainWindow):
 
         edit_menu = menu.addMenu("&Edit")
         edit_menu.addAction(self.action_resize_canvas)
+        edit_menu.addAction(self.action_open_settings)
 
         # Toolbar
         self.toolbar = QToolBar("Main Toolbar")
@@ -134,6 +141,10 @@ class NightPainterWindow(QtWidgets.QMainWindow):
         save_hotkey = Qt.KeyboardModifier.ControlModifier|Qt.Key.Key_S
         if e.keyCombination() == save_hotkey or e.key == Qt.Key.Key_Save:
             self.on_save_click()
+
+    def on_settings_click(self):
+        """ Open settings dialog """
+        pass
 
     def on_resize_canvas_click(self):
         """ Dialog to resize canvas """

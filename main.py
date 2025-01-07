@@ -315,8 +315,9 @@ class NightPainterWindow(QtWidgets.QMainWindow):
         return super().closeEvent(e)
 
 
-# Run app
-app = QtWidgets.QApplication([])
-window = NightPainterWindow()
-window.show()
-app.exec()
+if __name__ == "__main__":
+    # Run app
+    app = QtWidgets.QApplication([])
+    window = NightPainterWindow()
+    window.show()
+    app.exec()

@@ -2,6 +2,11 @@ from PySide6.QtWidgets import (
     QDialog, QDialogButtonBox, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit)
 
 class CanvasSizeDialog(QDialog):
+    """
+    Dialog to edit the canvas size.
+
+    parent -- Parent QWidget 
+    """
     def __init__(self, parent = None):
         super().__init__(parent)
 
@@ -93,3 +98,9 @@ class CanvasSizeDialog(QDialog):
             return height
         else:
             return self.default_size
+
+
+class PreferencesDialog(QDialog):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        

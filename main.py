@@ -55,6 +55,7 @@ class NightPainterWindow(QtWidgets.QMainWindow):
         print("reached")
 
     def keyPressEvent(self, e:QtGui.QKeyEvent):
+        """ Collection of hotkeys for keyPressEvents """
         # 'Undo' hotkey
         undo_hotkey = Qt.KeyboardModifier.ControlModifier|Qt.Key.Key_Z
         if e.keyCombination() == undo_hotkey:
@@ -65,8 +66,8 @@ class NightPainterWindow(QtWidgets.QMainWindow):
         if e.keyCombination() == save_hotkey or e.key == Qt.Key.Key_Save:
             self.on_save_click()
 
-    def on_settings_click(self):
-        """ Open settings dialog """
+    def on_preferences_click(self):
+        """ Open preferences dialog """
         pass
 
     def on_resize_canvas_click(self):
@@ -243,6 +244,7 @@ class NightPainterWindow(QtWidgets.QMainWindow):
         self.canvas.setAlignment(Qt.AlignLeft|Qt.AlignTop)
 
     def createActions(self):
+        """ Create actions """
         self.action_new_canvas = QAction(
             QIcon.fromTheme(QIcon.ThemeIcon.DocumentNew), "&New", self)
         self.action_new_canvas.setStatusTip("Create New Canvas")
@@ -276,13 +278,14 @@ class NightPainterWindow(QtWidgets.QMainWindow):
         self.action_resize_canvas.triggered.connect(
             self.on_resize_canvas_click)
 
-        self.action_open_settings = QAction(
-            QIcon.fromTheme(QIcon.ThemeIcon.DocumentProperties), "&Settings", self)
-        self.action_open_settings.setStatusTip("Open Settings Window")
-        self.action_open_settings.triggered.connect(
-            self.on_settings_click)
+        self.action_open_preferences = QAction(
+            QIcon.fromTheme(QIcon.ThemeIcon.DocumentProperties), "&Preferences", self)
+        self.action_open_preferences.setStatusTip("Open Settings Window")
+        self.action_open_preferences.triggered.connect(
+            self.on_preferences_click)
         
     def createMenuAndToolbar(self):
+        """ Create menu and toolbar """
         pen_size_label = QLabel("Size:")
         pen_size_px_label = QLabel("px")
         self.pen_size_edit = QLineEdit(self)
@@ -303,7 +306,7 @@ class NightPainterWindow(QtWidgets.QMainWindow):
 
         edit_menu = menu.addMenu("&Edit")
         edit_menu.addAction(self.action_resize_canvas)
-        edit_menu.addAction(self.action_open_settings)
+        edit_menu.addAction(self.action_open_preferences)
 
         # Toolbar
         self.toolbar = QToolBar("Main Toolbar")
@@ -319,6 +322,7 @@ class NightPainterWindow(QtWidgets.QMainWindow):
         self.toolbar.addAction(self.action_secondary_color)
 
     def closeEvent(self, e):
+        """ On close, write config settings """
         self.writeSettings()
         return super().closeEvent(e)
 

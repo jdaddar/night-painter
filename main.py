@@ -24,12 +24,7 @@ class NightPainterWindow(QtWidgets.QMainWindow):
         self.readSettings()
 
         # Create canvas 
-        self.canvas = Canvas(
-            self.canvas_width, self.canvas_height, self.bg_color)
-        self.canvas.set_primary_color(self.primary_color)
-        self.canvas.set_secondary_color(self.secondary_color)
-        self.canvas.set_pen_size(self.init_pen_size)
-        self.canvas.setAlignment(Qt.AlignLeft|Qt.AlignTop)
+        self.createCanvas()
 
         # Color picker dialog
         self.color_picker = QColorDialog(self)
@@ -47,82 +42,10 @@ class NightPainterWindow(QtWidgets.QMainWindow):
         self.secondary_pixmap.fill(self.secondary_color)
 
         # Actions
-        self.action_new_canvas = QAction(
-            QIcon.fromTheme(QIcon.ThemeIcon.DocumentNew), "&New", self)
-        self.action_new_canvas.setStatusTip("Create New Canvas")
-        self.action_new_canvas.triggered.connect(self.on_new_canvas_click)
-
-        self.action_save = QAction(
-            QIcon.fromTheme(QIcon.ThemeIcon.DocumentSave), "&Save", self)
-        self.action_save.setStatusTip("Quicksave File")
-        self.action_save.triggered.connect(self.on_save_click)
-
-        self.action_save_as = QAction(
-            QIcon.fromTheme(QIcon.ThemeIcon.DocumentSaveAs), "Save &As", self)
-        self.action_save_as.setStatusTip("Save File to PC")
-        self.action_save_as.triggered.connect(self.on_save_as_click)
-
-        self.action_primary_color = QAction(
-            QIcon(self.primary_pixmap),"Primary Color", self)
-        self.action_primary_color.setStatusTip("Choose Primary Color")
-        self.action_primary_color.triggered.connect(
-            self.on_primary_color_click)
-
-        self.action_secondary_color = QAction(
-            QIcon(self.secondary_pixmap),"Secondary Color", self)
-        self.action_secondary_color.setStatusTip("Choose Secondary Color")
-        self.action_secondary_color.triggered.connect(
-            self.on_secondary_color_click)
-        
-        self.action_resize_canvas = QAction(
-            QIcon.fromTheme(QIcon.ThemeIcon.ViewFullscreen), "&Resize Canvas", self)
-        self.action_resize_canvas.setStatusTip("Resize Canvas")
-        self.action_resize_canvas.triggered.connect(
-            self.on_resize_canvas_click)
-
-        self.action_open_settings = QAction(
-            QIcon.fromTheme(QIcon.ThemeIcon.DocumentProperties), "&Settings", self)
-        self.action_open_settings.setStatusTip("Open Settings Window")
-        self.action_open_settings.triggered.connect(
-            self.on_settings_click)
-
-        # Widgets for use in toolbar/menu
-        # Pen size widgets
-        pen_size_label = QLabel("Size:")
-        pen_size_px_label = QLabel("px")
-        self.pen_size_edit = QLineEdit(self)
-        self.pen_size_edit.setMaximumWidth(32)
-        self.pen_size_edit.setMaxLength(3)
-        self.pen_size_edit.setFocusPolicy(Qt.FocusPolicy.ClickFocus)
-        self.pen_size_edit.setAlignment(Qt.AlignmentFlag.AlignRight)
-        self.pen_size_edit.setText(str(self.canvas.get_pen_size()))
-        self.pen_size_edit.setInputMask('000')
-        self.pen_size_edit.editingFinished.connect(self.on_pen_size_change)
+        self.createActions()
 
         # Menu
-        menu = self.menuBar()
-
-        file_menu = menu.addMenu("&File")
-        file_menu.addAction(self.action_new_canvas)
-        file_menu.addAction(self.action_save)
-        file_menu.addAction(self.action_save_as)
-
-        edit_menu = menu.addMenu("&Edit")
-        edit_menu.addAction(self.action_resize_canvas)
-        edit_menu.addAction(self.action_open_settings)
-
-        # Toolbar
-        self.toolbar = QToolBar("Main Toolbar")
-        self.toolbar.setIconSize(QSize(16, 16))
-        self.toolbar.setMovable(False)
-        self.addToolBar(self.toolbar)
-
-        self.toolbar.addWidget(pen_size_label)
-        self.toolbar.addWidget(self.pen_size_edit)
-        self.toolbar.addWidget(pen_size_px_label)
-        self.toolbar.addSeparator()
-        self.toolbar.addAction(self.action_primary_color)
-        self.toolbar.addAction(self.action_secondary_color)
+        self.createMenuAndToolbar()
 
         self.setCentralWidget(self.canvas)
         self.setFocusPolicy(Qt.FocusPolicy.ClickFocus)
@@ -309,6 +232,91 @@ class NightPainterWindow(QtWidgets.QMainWindow):
         self.bg_color = settings.value("background_color", QtGui.QColor('black'))
         self.init_pen_size = int(settings.value("pen_size", 5))
         settings.endGroup()
+
+    def createCanvas(self):
+        """ Create canvas """
+        self.canvas = Canvas(
+            self.canvas_width, self.canvas_height, self.bg_color)
+        self.canvas.set_primary_color(self.primary_color)
+        self.canvas.set_secondary_color(self.secondary_color)
+        self.canvas.set_pen_size(self.init_pen_size)
+        self.canvas.setAlignment(Qt.AlignLeft|Qt.AlignTop)
+
+    def createActions(self):
+        self.action_new_canvas = QAction(
+            QIcon.fromTheme(QIcon.ThemeIcon.DocumentNew), "&New", self)
+        self.action_new_canvas.setStatusTip("Create New Canvas")
+        self.action_new_canvas.triggered.connect(self.on_new_canvas_click)
+
+        self.action_save = QAction(
+            QIcon.fromTheme(QIcon.ThemeIcon.DocumentSave), "&Save", self)
+        self.action_save.setStatusTip("Quicksave File")
+        self.action_save.triggered.connect(self.on_save_click)
+
+        self.action_save_as = QAction(
+            QIcon.fromTheme(QIcon.ThemeIcon.DocumentSaveAs), "Save &As", self)
+        self.action_save_as.setStatusTip("Save File to PC")
+        self.action_save_as.triggered.connect(self.on_save_as_click)
+
+        self.action_primary_color = QAction(
+            QIcon(self.primary_pixmap),"Primary Color", self)
+        self.action_primary_color.setStatusTip("Choose Primary Color")
+        self.action_primary_color.triggered.connect(
+            self.on_primary_color_click)
+
+        self.action_secondary_color = QAction(
+            QIcon(self.secondary_pixmap),"Secondary Color", self)
+        self.action_secondary_color.setStatusTip("Choose Secondary Color")
+        self.action_secondary_color.triggered.connect(
+            self.on_secondary_color_click)
+        
+        self.action_resize_canvas = QAction(
+            QIcon.fromTheme(QIcon.ThemeIcon.ViewFullscreen), "&Resize Canvas", self)
+        self.action_resize_canvas.setStatusTip("Resize Canvas")
+        self.action_resize_canvas.triggered.connect(
+            self.on_resize_canvas_click)
+
+        self.action_open_settings = QAction(
+            QIcon.fromTheme(QIcon.ThemeIcon.DocumentProperties), "&Settings", self)
+        self.action_open_settings.setStatusTip("Open Settings Window")
+        self.action_open_settings.triggered.connect(
+            self.on_settings_click)
+        
+    def createMenuAndToolbar(self):
+        pen_size_label = QLabel("Size:")
+        pen_size_px_label = QLabel("px")
+        self.pen_size_edit = QLineEdit(self)
+        self.pen_size_edit.setMaximumWidth(32)
+        self.pen_size_edit.setMaxLength(3)
+        self.pen_size_edit.setFocusPolicy(Qt.FocusPolicy.ClickFocus)
+        self.pen_size_edit.setAlignment(Qt.AlignmentFlag.AlignRight)
+        self.pen_size_edit.setText(str(self.canvas.get_pen_size()))
+        self.pen_size_edit.setInputMask('000')
+        self.pen_size_edit.editingFinished.connect(self.on_pen_size_change)
+
+        menu = self.menuBar()
+
+        file_menu = menu.addMenu("&File")
+        file_menu.addAction(self.action_new_canvas)
+        file_menu.addAction(self.action_save)
+        file_menu.addAction(self.action_save_as)
+
+        edit_menu = menu.addMenu("&Edit")
+        edit_menu.addAction(self.action_resize_canvas)
+        edit_menu.addAction(self.action_open_settings)
+
+        # Toolbar
+        self.toolbar = QToolBar("Main Toolbar")
+        self.toolbar.setIconSize(QSize(16, 16))
+        self.toolbar.setMovable(False)
+        self.addToolBar(self.toolbar)
+
+        self.toolbar.addWidget(pen_size_label)
+        self.toolbar.addWidget(self.pen_size_edit)
+        self.toolbar.addWidget(pen_size_px_label)
+        self.toolbar.addSeparator()
+        self.toolbar.addAction(self.action_primary_color)
+        self.toolbar.addAction(self.action_secondary_color)
 
     def closeEvent(self, e):
         self.writeSettings()

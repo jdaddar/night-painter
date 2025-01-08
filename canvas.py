@@ -1,9 +1,10 @@
 from PySide6 import QtWidgets, QtGui
 from PySide6.QtCore import Qt
+from PySide6.QtGui import QColor
 from collections import deque
 
 class Canvas(QtWidgets.QLabel):
-    def __init__(self, w: int, h: int, bg: QtGui.QColor=QtGui.QColor('black')): #TODO: make init more functional
+    def __init__(self, w: int, h: int, bg: str='black'): #TODO: make init more functional
         super().__init__()
 
         # Settings
@@ -13,7 +14,7 @@ class Canvas(QtWidgets.QLabel):
 
         # Create and set pixmap for canvas, using default color
         initial_pixmap = QtGui.QPixmap(w, h)
-        initial_pixmap.fill(self.canvas_bg_color)
+        initial_pixmap.fill(QColor(self.canvas_bg_color))
         self.setPixmap(initial_pixmap)
 
         # Initializing useful variables 
@@ -158,14 +159,16 @@ class Canvas(QtWidgets.QLabel):
         except IndexError: # IndexError can only occur if stack is empty,
             pass           # therefore pass as we have reached undo limit 
 
-    def reset(self):
+    def reset(self, bg=None):
         """ 
         Reverts canvas to base state
         Clears 'undo' stack 
         """
+        if not bg:
+            bg = self.canvas_bg_color
         clear_pixmap = QtGui.QPixmap(
             self.pixmap().width(), self.pixmap().height())
-        clear_pixmap.fill(self.canvas_bg_color)
+        clear_pixmap.fill(bg)
         self.setPixmap(clear_pixmap)
         self.pixmap_stack.clear()
 

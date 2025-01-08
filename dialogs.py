@@ -1,5 +1,7 @@
 from PySide6.QtWidgets import (
-    QDialog, QDialogButtonBox, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit)
+    QDialog, QDialogButtonBox, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit,
+    QColorDialog, QPushButton)
+from PySide6.QtGui import QAction, QIcon, QColor
 
 class CanvasSizeDialog(QDialog):
     """
@@ -101,6 +103,38 @@ class CanvasSizeDialog(QDialog):
 
 
 class PreferencesDialog(QDialog):
-    def __init__(self, parent=None):
+    def __init__(self, parent):
         super().__init__(parent)
+
+        self.setWindowTitle("Preferences")
+
+        # Helper variables
+        self.parent = parent
+
+        # Color Picker
+        self.color_picker = QColorDialog()
+
+        # Layout
+        background_label = QLabel("Default Background:")
+        self.bg_color_btn = QPushButton()
+        self.bg_color_btn.setStyleSheet(f"background: {self.parent.bg_color}")
+        self.bg_color_btn.clicked.connect(self.on_bg_color_btn_click)
         
+        bg_layout = QHBoxLayout()
+        bg_layout.addWidget(background_label)
+        bg_layout.addWidget(self.bg_color_btn)
+
+        layout = QVBoxLayout()
+        layout.addLayout(bg_layout)
+        
+        self.setLayout(layout)
+
+    def on_bg_color_btn_click(self):
+        self.color_picker.setCurrentColor(self.parent.bg_color)
+        accepted = self.color_picker.exec()
+        
+        if accepted:
+            self.parent.bg_color = self.color_picker.currentColor().name(
+                QColor.HexRgb)
+            self.bg_color_btn.setStyleSheet(f"background: {self.parent.bg_color}")
+            

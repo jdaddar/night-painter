@@ -3,11 +3,11 @@ from PySide6.QtWidgets import (
     QLabel, QDialog, QColorDialog, QToolBar, QFileDialog, QLineEdit, 
     QDialogButtonBox, QHBoxLayout, QVBoxLayout)
 from PySide6.QtGui import (
-    QScreen, QGuiApplication, QAction, QIcon, QPixmap, QIntValidator)
+    QScreen, QGuiApplication, QAction, QIcon, QPixmap, QIntValidator, QColor)
 from PySide6.QtCore import Qt, QSize, QPoint, QByteArray, QBuffer, QSettings
 
 from canvas import Canvas
-from dialogs import CanvasSizeDialog
+from dialogs import CanvasSizeDialog, PreferencesDialog
 
 class NightPainterWindow(QtWidgets.QMainWindow):
     def __init__(self): # TODO: make init more functional
@@ -68,7 +68,8 @@ class NightPainterWindow(QtWidgets.QMainWindow):
 
     def on_preferences_click(self):
         """ Open preferences dialog """
-        pass
+        preferences_dlg = PreferencesDialog(self)
+        accepted = preferences_dlg.exec()
 
     def on_resize_canvas_click(self):
         """ Dialog to resize canvas """
@@ -84,7 +85,7 @@ class NightPainterWindow(QtWidgets.QMainWindow):
 
     def on_new_canvas_click(self):
         """ Create new canvas """
-        self.canvas.reset()
+        self.canvas.reset(self.bg_color)
         self.current_filename = None
 
     def on_save_click(self):
@@ -207,7 +208,7 @@ class NightPainterWindow(QtWidgets.QMainWindow):
         settings.setValue("canvas_height", self.canvas.get_height())
         settings.setValue("primary_color", self.canvas.get_primary_color()) 
         settings.setValue("secondary_color", self.canvas.get_secondary_color())
-        settings.setValue("background_color", self.canvas.canvas_bg_color)
+        settings.setValue("background_color", self.bg_color)
         settings.setValue("pen_size", self.canvas.get_pen_size())
         settings.endGroup()
 
@@ -230,7 +231,7 @@ class NightPainterWindow(QtWidgets.QMainWindow):
         self.canvas_height = int(settings.value("canvas_height", 720))
         self.primary_color = settings.value("primary_color", QtGui.QColor('white'))
         self.secondary_color = settings.value("secondary_color", QtGui.QColor('black'))
-        self.bg_color = settings.value("background_color", QtGui.QColor('black'))
+        self.bg_color = settings.value("background_color", '#000000')
         self.init_pen_size = int(settings.value("pen_size", 5))
         settings.endGroup()
 

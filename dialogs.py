@@ -1,6 +1,6 @@
 from PySide6.QtWidgets import (
     QDialog, QDialogButtonBox, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit,
-    QColorDialog, QPushButton)
+    QColorDialog, QPushButton, QCheckBox)
 from PySide6.QtGui import QAction, QIcon, QColor
 
 class CanvasSizeDialog(QDialog):
@@ -129,12 +129,24 @@ class PreferencesDialog(QDialog):
         bg_layout.addWidget(background_label)
         bg_layout.addWidget(self.bg_color_btn)
 
+        antialiasing_label = QLabel("Antialising:")
+        self.antialiasing_check = QCheckBox()
+        self.antialiasing_check.setChecked(self.parent.aa)
+        self.antialiasing_check.checkStateChanged.connect(
+            self.on_antialiasing_check_change)
+
+        aa_layout = QHBoxLayout()
+        aa_layout.addWidget(antialiasing_label)
+        aa_layout.addWidget(self.antialiasing_check)
+
         layout = QVBoxLayout()
         layout.addLayout(bg_layout)
+        layout.addLayout(aa_layout)        
         
         self.setLayout(layout)
 
     def on_bg_color_btn_click(self):
+        """ Open Color Picker and set new default background color """
         self.color_picker.setCurrentColor(self.parent.bg_color)
         accepted = self.color_picker.exec()
         
@@ -142,4 +154,8 @@ class PreferencesDialog(QDialog):
             self.parent.bg_color = self.color_picker.currentColor().name(
                 QColor.HexRgb)
             self.bg_color_btn.setStyleSheet(f"background: {self.parent.bg_color}")
+
+    def on_antialiasing_check_change(self):
+        """ Toggle antialiasing """
+        self.parent.set_antialiasing(self.antialiasing_check.isChecked())
             

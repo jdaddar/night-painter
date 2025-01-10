@@ -4,11 +4,16 @@ from PySide6.QtGui import QColor
 from collections import deque
 
 class Canvas(QtWidgets.QLabel):
-    def __init__(self, w: int, h: int, bg: str='black'): #TODO: make init more functional
+    def __init__(self, 
+                 w: int, 
+                 h: int, 
+                 bg: str='black',
+                 aa: bool=True): #TODO: make init more functional
         super().__init__()
 
         # Settings
         self.canvas_bg_color = bg # TODO: load from setting
+        self.antialiasing = aa
         max_undo = 200 # rec values: low:20, mid:50, high:200, ultra:500 #TODO: load from setting
                        # max mb ram:    100,    215       770
 
@@ -33,10 +38,6 @@ class Canvas(QtWidgets.QLabel):
     def set_pen_size(self, size):
         """ Set pen size """
         self.pen.setWidth(size)
-
-    def get_pen_size(self):
-        """ Return pen size """
-        return self.pen.width()
     
     def set_primary_color(self, color):
         """ Set primary color """
@@ -45,6 +46,10 @@ class Canvas(QtWidgets.QLabel):
     def set_secondary_color(self, color):
         """ Set pen secondary color """
         self.secondary_color = QtGui.QColor(color)
+
+    def set_antialiasing(self, aa):
+        """ Set antialiasing """
+        self.antialiasing = aa
 
     def get_primary_color(self):
         """ Return primary color """
@@ -61,6 +66,10 @@ class Canvas(QtWidgets.QLabel):
     def get_height(self):
         """ Return canvas height """
         return self.pixmap().height()
+    
+    def get_pen_size(self):
+        """ Return pen size """
+        return self.pen.width()
 
     def draw_pen_point(self, x, y, color):
         """ 
@@ -68,7 +77,8 @@ class Canvas(QtWidgets.QLabel):
         """
         current_pixmap = self.pixmap()
         painter = QtGui.QPainter(current_pixmap)
-        painter.setRenderHint(QtGui.QPainter.Antialiasing)
+        if self.antialiasing:
+            painter.setRenderHint(QtGui.QPainter.Antialiasing)
         self.pen.setColor(color)
         painter.setPen(self.pen)
         painter.drawPoint(x, y)
@@ -82,7 +92,8 @@ class Canvas(QtWidgets.QLabel):
         """
         current_pixmap = self.pixmap()
         painter = QtGui.QPainter(current_pixmap)
-        painter.setRenderHint(QtGui.QPainter.Antialiasing)
+        if self.antialiasing:
+            painter.setRenderHint(QtGui.QPainter.Antialiasing)
         self.pen.setColor(color)
         painter.setPen(self.pen)
         painter.drawLine(start_x, start_y, x, y)

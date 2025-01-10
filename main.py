@@ -66,6 +66,11 @@ class NightPainterWindow(QtWidgets.QMainWindow):
         if e.keyCombination() == save_hotkey or e.key == Qt.Key.Key_Save:
             self.on_save_click()
 
+    def set_antialiasing(self, aa):
+        """ Set antialiasing """
+        self.aa = aa
+        self.canvas.set_antialiasing(aa)
+
     def on_preferences_click(self):
         """ Open preferences dialog """
         preferences_dlg = PreferencesDialog(self)
@@ -210,6 +215,7 @@ class NightPainterWindow(QtWidgets.QMainWindow):
         settings.setValue("secondary_color", self.canvas.get_secondary_color())
         settings.setValue("background_color", self.bg_color)
         settings.setValue("pen_size", self.canvas.get_pen_size())
+        settings.setValue("antialiasing", self.aa)
         settings.endGroup()
 
     def readSettings(self):
@@ -233,12 +239,13 @@ class NightPainterWindow(QtWidgets.QMainWindow):
         self.secondary_color = settings.value("secondary_color", QtGui.QColor('black'))
         self.bg_color = settings.value("background_color", '#000000')
         self.init_pen_size = int(settings.value("pen_size", 5))
+        self.aa = settings.value("antialiasing", True, type=bool)
         settings.endGroup()
 
     def createCanvas(self):
         """ Create canvas """
         self.canvas = Canvas(
-            self.canvas_width, self.canvas_height, self.bg_color)
+            self.canvas_width, self.canvas_height, self.bg_color, self.aa)
         self.canvas.set_primary_color(self.primary_color)
         self.canvas.set_secondary_color(self.secondary_color)
         self.canvas.set_pen_size(self.init_pen_size)

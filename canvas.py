@@ -1,6 +1,6 @@
 from PySide6 import QtWidgets, QtGui
 from PySide6.QtCore import Qt
-from PySide6.QtGui import QColor
+from PySide6.QtGui import QColor, QImage
 from collections import deque
 
 class Canvas(QtWidgets.QLabel):
@@ -70,6 +70,11 @@ class Canvas(QtWidgets.QLabel):
     def get_pen_size(self):
         """ Return pen size """
         return self.pen.width()
+    
+    def open_image(self, image:QImage):
+        self.pixmap_stack.append(self.pixmap())
+        image_pixmap = QtGui.QPixmap.fromImage(image)
+        self.setPixmap(image_pixmap)
 
     def draw_pen_point(self, x, y, color):
         """ 

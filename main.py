@@ -3,7 +3,8 @@ from PySide6.QtWidgets import (
     QLabel, QDialog, QColorDialog, QToolBar, QFileDialog, QLineEdit, 
     QDialogButtonBox, QHBoxLayout, QVBoxLayout)
 from PySide6.QtGui import (
-    QScreen, QGuiApplication, QAction, QIcon, QPixmap, QIntValidator, QColor)
+    QScreen, QGuiApplication, QAction, QIcon, QPixmap, QIntValidator, QColor,
+    QImage)
 from PySide6.QtCore import Qt, QSize, QPoint, QByteArray, QBuffer, QSettings
 
 from canvas import Canvas
@@ -31,7 +32,6 @@ class NightPainterWindow(QtWidgets.QMainWindow):
 
         # File dialog
         self.file_dialog = QFileDialog(self)
-        self.file_dialog.setAcceptMode(QFileDialog.AcceptSave)
         self.file_dialog.setNameFilter("Images (*.png *.jpg *.jpeg *.bmp)")
         self.current_filename = None
 
@@ -86,12 +86,25 @@ class NightPainterWindow(QtWidgets.QMainWindow):
         if accepted:
             self.canvas.resize_canvas(
                 canvas_size_dlg.get_width_int(), 
-                canvas_size_dlg.get_height_int())            
+                canvas_size_dlg.get_height_int())
 
     def on_new_canvas_click(self):
         """ Create new canvas """
         self.canvas.reset(self.bg_color)
         self.current_filename = None
+
+    def on_open_click(self):
+        """
+        Open image from file, converting to pixmap and 
+        displaying on canvas.
+        """
+        self.file_dialog.setAcceptMode(QFileDialog.AcceptOpen)
+        file_dialog_success = self.file_dialog.exec()
+
+        if file_dialog_success:
+            filename = self.file_dialog.selectedFiles()[0]
+            self.canvas.open_image(QImage(filename))
+            self.current_filename = filename
 
     def on_save_click(self):
         """ 
@@ -105,6 +118,7 @@ class NightPainterWindow(QtWidgets.QMainWindow):
 
     def on_save_as_click(self):
         """ Save and associated canvas to specific file """
+        self.file_dialog.setAcceptMode(QFileDialog.AcceptSave)
         file_dialog_success = self.file_dialog.exec()
         
         if file_dialog_success:
@@ -268,6 +282,11 @@ class NightPainterWindow(QtWidgets.QMainWindow):
         self.action_save_as.setStatusTip("Save File to PC")
         self.action_save_as.triggered.connect(self.on_save_as_click)
 
+        self.action_open = QAction(
+            QIcon.fromTheme(QIcon.ThemeIcon.DocumentOpen), "&Open", self)
+        self.action_open.setStatusTip("Open Image from File")
+        self.action_open.triggered.connect(self.on_open_click)
+
         self.action_primary_color = QAction(
             QIcon(self.primary_pixmap),"Primary Color", self)
         self.action_primary_color.setStatusTip("Choose Primary Color")
@@ -311,6 +330,7 @@ class NightPainterWindow(QtWidgets.QMainWindow):
         file_menu.addAction(self.action_new_canvas)
         file_menu.addAction(self.action_save)
         file_menu.addAction(self.action_save_as)
+        file_menu.addAction(self.action_open)
 
         edit_menu = menu.addMenu("&Edit")
         edit_menu.addAction(self.action_resize_canvas)

@@ -66,10 +66,23 @@ class NightPainterWindow(QtWidgets.QMainWindow):
         if e.keyCombination() == save_hotkey or e.key == Qt.Key.Key_Save:
             self.on_save_click()
 
+        # 'Paste' hotkey 
+        paste_hotkey = Qt.KeyboardModifier.ControlModifier|Qt.Key.Key_V
+        if e.keyCombination() == paste_hotkey:
+            self.on_paste_click()
+
     def set_antialiasing(self, aa):
         """ Set antialiasing """
         self.aa = aa
         self.canvas.set_antialiasing(aa)
+
+    def on_paste_click(self):
+        """ Paste image clipboard """
+        clipboard = QGuiApplication.clipboard()
+        image = clipboard.image()
+
+        if image:
+            self.canvas.open_image(image)
 
     def on_preferences_click(self):
         """ Open preferences dialog """
@@ -299,6 +312,12 @@ class NightPainterWindow(QtWidgets.QMainWindow):
         self.action_secondary_color.triggered.connect(
             self.on_secondary_color_click)
         
+        self.action_paste = QAction(
+            QIcon.fromTheme(QIcon.ThemeIcon.EditPaste), "&Paste", self)
+        self.action_paste.setStatusTip("Paste Image from Clipboard")
+        self.action_paste.triggered.connect(
+            self.on_paste_click)
+        
         self.action_resize_canvas = QAction(
             QIcon.fromTheme(QIcon.ThemeIcon.ViewFullscreen), "&Resize Canvas", self)
         self.action_resize_canvas.setStatusTip("Resize Canvas")
@@ -306,7 +325,7 @@ class NightPainterWindow(QtWidgets.QMainWindow):
             self.on_resize_canvas_click)
 
         self.action_open_preferences = QAction(
-            QIcon.fromTheme(QIcon.ThemeIcon.DocumentProperties), "&Preferences", self)
+            QIcon.fromTheme(QIcon.ThemeIcon.DocumentProperties), "Preference&s", self)
         self.action_open_preferences.setStatusTip("Open Settings Window")
         self.action_open_preferences.triggered.connect(
             self.on_preferences_click)
@@ -333,6 +352,7 @@ class NightPainterWindow(QtWidgets.QMainWindow):
         file_menu.addAction(self.action_open)
 
         edit_menu = menu.addMenu("&Edit")
+        edit_menu.addAction(self.action_paste)
         edit_menu.addAction(self.action_resize_canvas)
         edit_menu.addAction(self.action_open_preferences)
 
@@ -342,6 +362,8 @@ class NightPainterWindow(QtWidgets.QMainWindow):
         self.toolbar.setMovable(False)
         self.addToolBar(self.toolbar)
 
+        self.toolbar.addAction(self.action_paste)
+        self.toolbar.addSeparator()
         self.toolbar.addWidget(pen_size_label)
         self.toolbar.addWidget(self.pen_size_edit)
         self.toolbar.addWidget(pen_size_px_label)

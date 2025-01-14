@@ -1,7 +1,7 @@
 from PySide6 import QtCore, QtGui, QtWidgets
 from PySide6.QtWidgets import (
     QLabel, QDialog, QColorDialog, QToolBar, QFileDialog, QLineEdit, 
-    QDialogButtonBox, QHBoxLayout, QVBoxLayout)
+    QDialogButtonBox, QHBoxLayout, QVBoxLayout, QApplication)
 from PySide6.QtGui import (
     QScreen, QGuiApplication, QAction, QIcon, QPixmap, QIntValidator, QColor,
     QImage)
@@ -17,7 +17,7 @@ class NightPainterWindow(QtWidgets.QMainWindow):
         self.setWindowTitle("Night Painter")
 
         # Get primary screen info & open app on primary screen
-        self.primaryScreen = QGuiApplication.primaryScreen()
+        self.primaryScreen = QApplication.primaryScreen()
         self.setScreen(self.primaryScreen)
         self.setMinimumSize(320, 180) # Avoid making window too small for use
 
@@ -66,6 +66,11 @@ class NightPainterWindow(QtWidgets.QMainWindow):
         if e.keyCombination() == save_hotkey or e.key == Qt.Key.Key_Save:
             self.on_save_click()
 
+        # 'Copy' hotkey
+        copy_hotkey = Qt.KeyboardModifier.ControlModifier|Qt.Key.Key_C
+        if e.keyCombination() == copy_hotkey:
+            self.on_copy_click()
+
         # 'Paste' hotkey 
         paste_hotkey = Qt.KeyboardModifier.ControlModifier|Qt.Key.Key_V
         if e.keyCombination() == paste_hotkey:
@@ -77,12 +82,19 @@ class NightPainterWindow(QtWidgets.QMainWindow):
         self.canvas.set_antialiasing(aa)
 
     def on_paste_click(self):
-        """ Paste image clipboard """
-        clipboard = QGuiApplication.clipboard()
+        """ Paste image from clipboard """
+        clipboard = QApplication.clipboard()
         image = clipboard.image()
 
         if image:
             self.canvas.open_image(image)
+
+    def on_copy_click(self):
+        """ Copy pixmap to clipboard as image """
+        clipboard = QApplication.clipboard()
+        pixmap = self.canvas.pixmap()
+        # using clipboard.setPixmap() seems to give bug
+        clipboard.setImage(pixmap.toImage())
 
     def on_preferences_click(self):
         """ Open preferences dialog """
@@ -312,26 +324,33 @@ class NightPainterWindow(QtWidgets.QMainWindow):
         self.action_secondary_color.triggered.connect(
             self.on_secondary_color_click)
         
+        self.action_copy = QAction(
+            QIcon.fromTheme(QIcon.ThemeIcon.EditCopy), "&Copy", self)
+        self.action_copy.setStatusTip("Copy Canvas to Clipboard as Image")
+        self.action_copy.triggered.connect(self.on_copy_click)
+
         self.action_paste = QAction(
             QIcon.fromTheme(QIcon.ThemeIcon.EditPaste), "&Paste", self)
         self.action_paste.setStatusTip("Paste Image from Clipboard")
-        self.action_paste.triggered.connect(
-            self.on_paste_click)
+        self.action_paste.triggered.connect(self.on_paste_click)
         
         self.action_resize_canvas = QAction(
-            QIcon.fromTheme(QIcon.ThemeIcon.ViewFullscreen), "&Resize Canvas", self)
+            QIcon.fromTheme(QIcon.ThemeIcon.ViewFullscreen), 
+            "&Resize Canvas", self)
         self.action_resize_canvas.setStatusTip("Resize Canvas")
         self.action_resize_canvas.triggered.connect(
             self.on_resize_canvas_click)
 
         self.action_open_preferences = QAction(
-            QIcon.fromTheme(QIcon.ThemeIcon.DocumentProperties), "Preference&s", self)
+            QIcon.fromTheme(QIcon.ThemeIcon.DocumentProperties), 
+            "Preference&s", self)
         self.action_open_preferences.setStatusTip("Open Settings Window")
         self.action_open_preferences.triggered.connect(
             self.on_preferences_click)
         
     def createMenuAndToolbar(self):
         """ Create menu and toolbar """
+        # Widgets
         pen_size_label = QLabel("Size:")
         pen_size_px_label = QLabel("px")
         self.pen_size_edit = QLineEdit(self)
@@ -343,6 +362,7 @@ class NightPainterWindow(QtWidgets.QMainWindow):
         self.pen_size_edit.setInputMask('000')
         self.pen_size_edit.editingFinished.connect(self.on_pen_size_change)
 
+        # Menus
         menu = self.menuBar()
 
         file_menu = menu.addMenu("&File")
@@ -352,6 +372,7 @@ class NightPainterWindow(QtWidgets.QMainWindow):
         file_menu.addAction(self.action_open)
 
         edit_menu = menu.addMenu("&Edit")
+        edit_menu.addAction(self.action_copy)
         edit_menu.addAction(self.action_paste)
         edit_menu.addAction(self.action_resize_canvas)
         edit_menu.addAction(self.action_open_preferences)
@@ -362,6 +383,7 @@ class NightPainterWindow(QtWidgets.QMainWindow):
         self.toolbar.setMovable(False)
         self.addToolBar(self.toolbar)
 
+        self.toolbar.addAction(self.action_copy)
         self.toolbar.addAction(self.action_paste)
         self.toolbar.addSeparator()
         self.toolbar.addWidget(pen_size_label)
@@ -379,7 +401,7 @@ class NightPainterWindow(QtWidgets.QMainWindow):
 
 if __name__ == "__main__":
     # Run app
-    app = QtWidgets.QApplication([])
+    app = QApplication([])
     window = NightPainterWindow()
     window.show()
     app.exec()

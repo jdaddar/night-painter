@@ -50,10 +50,6 @@ class NightPainterWindow(QtWidgets.QMainWindow):
         self.setCentralWidget(self.canvas)
         self.setFocusPolicy(Qt.FocusPolicy.ClickFocus)
 
-    def reached(self): #TODO: remove
-        """ Testing signal reach """
-        print("reached")
-
     def keyPressEvent(self, e:QtGui.QKeyEvent):
         """ Collection of hotkeys for keyPressEvents """
         # 'Undo' hotkey

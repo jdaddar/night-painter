@@ -1,7 +1,7 @@
 from PySide6.QtWidgets import (
     QDialog, QDialogButtonBox, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit,
     QColorDialog, QPushButton, QCheckBox)
-from PySide6.QtGui import QAction, QIcon, QColor
+from PySide6.QtGui import QColor
 
 class CanvasSizeDialog(QDialog):
     """

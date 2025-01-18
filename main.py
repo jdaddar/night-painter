@@ -1,11 +1,10 @@
-from PySide6 import QtCore, QtGui, QtWidgets
+from PySide6 import QtGui, QtWidgets
 from PySide6.QtWidgets import (
-    QLabel, QDialog, QColorDialog, QToolBar, QFileDialog, QLineEdit, 
-    QDialogButtonBox, QHBoxLayout, QVBoxLayout, QApplication)
+    QLabel, QColorDialog, QToolBar, QFileDialog, QLineEdit, 
+    QApplication)
 from PySide6.QtGui import (
-    QScreen, QGuiApplication, QAction, QIcon, QPixmap, QIntValidator, QColor,
-    QImage)
-from PySide6.QtCore import Qt, QSize, QPoint, QByteArray, QBuffer, QSettings
+    QAction, QIcon, QPixmap, QImage)
+from PySide6.QtCore import Qt, QSize, QByteArray, QSettings
 
 from canvas import Canvas
 from dialogs import CanvasSizeDialog, PreferencesDialog

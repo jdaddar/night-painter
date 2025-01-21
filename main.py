@@ -3,7 +3,7 @@ from PySide6.QtWidgets import (
     QLabel, QColorDialog, QToolBar, QFileDialog, QLineEdit, 
     QApplication)
 from PySide6.QtGui import (
-    QAction, QIcon, QPixmap, QImage)
+    QAction, QIcon, QPixmap, QImage, QShortcut, QKeySequence)
 from PySide6.QtCore import Qt, QSize, QByteArray, QSettings
 
 from canvas import Canvas
@@ -35,41 +35,22 @@ class NightPainterWindow(QtWidgets.QMainWindow):
         self.current_filename = None
 
         # Color pixmaps
-        self.primary_pixmap = QPixmap(32, 32)
+        self.primary_pixmap = QPixmap(16, 16)
         self.primary_pixmap.fill(self.primary_color)
-        self.secondary_pixmap = QPixmap(32, 32)
+        self.secondary_pixmap = QPixmap(16, 16)
         self.secondary_pixmap.fill(self.secondary_color)
 
-        # Actions
+        # Create actions
         self.createActions()
 
-        # Menu
+        # Create menu and toolbar
         self.createMenuAndToolbar()
+
+        # Hotkeys
+        self.create_hotkeys()
 
         self.setCentralWidget(self.canvas)
         self.setFocusPolicy(Qt.FocusPolicy.ClickFocus)
-
-    def keyPressEvent(self, e:QtGui.QKeyEvent):
-        """ Collection of hotkeys for keyPressEvents """
-        # 'Undo' hotkey
-        undo_hotkey = Qt.KeyboardModifier.ControlModifier|Qt.Key.Key_Z
-        if e.keyCombination() == undo_hotkey:
-            self.canvas.undo()
-
-        # 'Save' hotkey
-        save_hotkey = Qt.KeyboardModifier.ControlModifier|Qt.Key.Key_S
-        if e.keyCombination() == save_hotkey or e.key == Qt.Key.Key_Save:
-            self.on_save_click()
-
-        # 'Copy' hotkey
-        copy_hotkey = Qt.KeyboardModifier.ControlModifier|Qt.Key.Key_C
-        if e.keyCombination() == copy_hotkey:
-            self.on_copy_click()
-
-        # 'Paste' hotkey 
-        paste_hotkey = Qt.KeyboardModifier.ControlModifier|Qt.Key.Key_V
-        if e.keyCombination() == paste_hotkey:
-            self.on_paste_click()
 
     def set_antialiasing(self, aa):
         """ Set antialiasing """
@@ -232,6 +213,34 @@ class NightPainterWindow(QtWidgets.QMainWindow):
             self.pen_size_edit.setText(str(prev_pen_size))
         else:
             self.canvas.set_pen_size(int(text))
+
+    def create_hotkeys(self):
+        """ Create hotkeys """
+        # Undo
+        undo_hotkey = QShortcut(
+            QKeySequence(QKeySequence.StandardKey.Undo),
+            self)
+        undo_hotkey.activated.connect(self.canvas.undo)
+        # Save
+        save_hotkey = QShortcut(
+            QKeySequence(QKeySequence.StandardKey.Save),
+            self)
+        save_hotkey.activated.connect(self.on_save_click)
+        # Save As
+        save_as_hotkey = QShortcut(
+            QKeySequence(QKeySequence.StandardKey.SaveAs),
+            self)
+        save_as_hotkey.activated.connect(self.on_save_as_click)
+        # Copy
+        copy_hotkey = QShortcut(
+            QKeySequence(QKeySequence.StandardKey.Copy),
+            self)
+        copy_hotkey.activated.connect(self.on_copy_click)
+        # Paste
+        paste_hotkey = QShortcut(
+            QKeySequence(QKeySequence.StandardKey.Paste),
+            self)
+        paste_hotkey.activated.connect(self.on_paste_click)
 
     def writeSettings(self):
         """ Write out settings/config """

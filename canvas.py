@@ -14,7 +14,7 @@ class Canvas(QtWidgets.QLabel):
         # Settings
         self.canvas_bg_color = bg # TODO: load from setting
         self.antialiasing = aa
-        max_undo = 200 # rec values: low:20, mid:50, high:200, ultra:500 #TODO: load from setting
+        self.max_undo = 100 # rec values: low:20, mid:50, high:200, ultra:500 #TODO: load from setting
                        # max mb ram:    100,    215       770
 
         # Create and set pixmap for canvas, using default color
@@ -24,7 +24,7 @@ class Canvas(QtWidgets.QLabel):
 
         # Initializing useful variables 
         self.prev_x, self.prev_y = None, None
-        self.pixmap_stack = deque([], max_undo)
+        self.pixmap_stack = deque([], self.max_undo)
 
         # Pen settings
         self.primary_color = QtGui.QColor('white')
@@ -51,6 +51,10 @@ class Canvas(QtWidgets.QLabel):
         """ Set antialiasing """
         self.antialiasing = aa
 
+    def set_max_undo(self, maximum):
+        """ Set max undo size """
+        self.max_undo = maximum
+
     def get_primary_color(self):
         """ Return primary color """
         return self.primary_color
@@ -70,6 +74,10 @@ class Canvas(QtWidgets.QLabel):
     def get_pen_size(self):
         """ Return pen size """
         return self.pen.width()
+    
+    def get_max_undo(self):
+        """ Return the max undo size """
+        return self.max_undo
     
     def open_image(self, image:QImage):
         self.pixmap_stack.append(self.pixmap())
